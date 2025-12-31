@@ -2,6 +2,10 @@
 import socket
 import logging
 
+from google.protobuf.json_format import MessageToDict
+
+from .cmds_pb2 import *
+
 logger = logging.getLogger("esp32_api")
 logging.basicConfig(
     level=logging.DEBUG,  # Log DEBUG and above (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -9,8 +13,6 @@ logging.basicConfig(
     #filename='_esp32_zephyr_pyapi.log',  # Log to file (omit this to log to console)
     encoding='utf-8'  # Optional: handle non-ASCII characters
 )
-
-from  .cmds_pb2 import *
 
 class Esp32API:
     """
@@ -75,81 +77,104 @@ class Esp32API:
 
         return res
 
-    # Example API methods for high-level usage; you can extend these as needed:
     def version_get(self) -> dict:
-        version = {
-            'version': 0,
-            'branch': '',
-            'sha1': '',
-            'commit_date': ''
+        resp_dict = {
+            'data': {}, 'status': {'ret': ''}
         }
 
         req = request()
         res = self.send_cmd(req, VERSION_GET)
         if res is not None:
             if res.hdr.ret == OK:
-                version['version'] = res.version_get.version
-                version['branch'] = res.version_get.branch
-                version['sha1'] = res.version_get.sha1
-                version['commit_date'] = res.version_get.commit_date
+                resp_dict['data']['version'] = res.version_get.version
+                resp_dict['data']['branch'] = res.version_get.branch
+                resp_dict['data']['sha1'] = res.version_get.sha1
+                resp_dict['data']['commit_date'] = res.version_get.commit_date
+                resp_dict['status']['ret'] = 'OK'
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
+                resp_dict['status']['ret'] = 'Error'
+                resp_dict['status']['err_msg'] = res.hdr.err_msg
 
-        return version
+        return resp_dict
 
-    def adc_channels_get(self) -> int:
-        adc_chs = 0
+    def adc_channels_get(self) -> dict:
+        resp_dict = {
+            'data': {}, 'status': {'ret': ''}
+        }
 
         req = request()
         res = self.send_cmd(req, ADC_CHS_GET)
         if res is not None:
             if res.hdr.ret == OK:
-                adc_chs = res.adc_chs_get.adc_chs
+                resp_dict['data']['adc_chs'] = res.adc_chs_get.adc_chs
+                resp_dict['status']['ret'] = 'OK'
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
+                resp_dict['status']['ret'] = 'Error'
+                resp_dict['status']['err_msg'] = res.hdr.err_msg
 
-        return adc_chs
+        return resp_dict
 
-    def adc_channel_read(self, ch: int) -> int:
-        adc_val = 0
+    def adc_channel_read(self, ch: int) -> dict:
+        resp_dict = {
+            'data': {}, 'status': {'ret': ''}
+        }
+
         req = request()
         req.adc_ch_read.ch = ch
         res = self.send_cmd(req, ADC_CH_READ)
         if res is not None:
             if res.hdr.ret == OK:
-                adc_val = res.adc_ch_read.val
+                resp_dict['data']['adc_val'] = res.adc_ch_read.val
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
+                resp_dict['status']['ret'] = 'Error'
+                resp_dict['status']['err_msg'] = res.hdr.err_msg
 
-        return adc_val
+        return resp_dict
 
-    def pwm_chs_get(self) -> int:
+    def pwm_chs_get(self) -> dict:
+        resp_dict = {
+            'data': {}, 'status': {'ret': ''}
+        }
+
         pwm_chs = 0
         req = request()
         res = self.send_cmd(req, PWM_CHS_GET)
         if res is not None:
             if res.hdr.ret == OK:
-                pwm_chs = res.pwm_chs_get.pwm_chs
+                resp_dict['data']['pwm_chs'] = res.pwm_chs_get.pwm_chs
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
+                resp_dict['status']['ret'] = 'Error'
+                resp_dict['status']['err_msg'] = res.hdr.err_msg
 
-        return pwm_chs
+        return resp_dict
 
     def pwm_get(self, ch: int) -> dict:
+        resp_dict = {
+            'data': {}, 'status': {'ret': ''}
+        }
+
         adc_val = 0
         req = request()
         req.adc_ch_read.ch = ch
         res = self.send_cmd(req, PWM_CH_GET)
         if res is not None:
             if res.hdr.ret == OK:
-                adc_val = res.adc_ch_read.val
+                resp_dict['data']['adc_val'] = res.adc_ch_read.val
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
+                resp_dict['status']['ret'] = 'Error'
+                resp_dict['status']['err_msg'] = res.hdr.err_msg
 
-        return adc_val
+        return resp_dict
 
-    def pwm_set(self, ch: int, period: int, pulse: int) -> bool:
-        success = True
+    def pwm_set(self, ch: int, period: int, pulse: int) -> dict:
+        resp_dict = {
+            'data': {}, 'status': {'ret': ''}
+        }
 
         req = request()
         req.pwm_ch_set.ch = ch
@@ -159,23 +184,25 @@ class Esp32API:
         if res is not None:
             if res.hdr.ret != OK:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
-                success = False
+                resp_dict['status']['ret'] = 'Error'
+                resp_dict['status']['err_msg'] = res.hdr.err_msg
 
-        return success
+        return resp_dict
 
     def pwm_periods_get(self) -> dict:
-        pwm_periods_interval = {
-            'min': 0,
-            'max': 0
+        resp_dict = {
+            'data': {}, 'status': {'ret': ''}
         }
 
         req = request()
         res = self.send_cmd(req, PWM_PERIOD_INTERVAL_GET)
         if res is not None:
             if res.hdr.ret == OK:
-                pwm_periods_interval['min'] = res.pwm_periods_get.period_min
-                pwm_periods_interval['max'] = res.pwm_periods_get.period_min
+                resp_dict['data']['min'] = res.pwm_periods_get.period_min
+                resp_dict['data']['max'] = res.pwm_periods_get.period_max
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
+                resp_dict['status']['ret'] = 'Error'
+                resp_dict['status']['err_msg'] = res.hdr.err_msg
 
-        return pwm_periods_interval
+        return resp_dict
