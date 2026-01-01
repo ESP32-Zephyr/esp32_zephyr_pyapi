@@ -12,4 +12,4 @@ add_custom_target(
 add_custom_target(py_proto
     COMMAND protoc --python_out=${CMAKE_CURRENT_SOURCE_DIR}/src/esp32_zephyr_api/ --proto_path=${CMAKE_CURRENT_SOURCE_DIR}/esp32_zephyr/proto/ cmds.proto
 )
-#add_dependencies(app py_proto)
+add_dependencies(esp32_zephyr_pyapi py_proto)
