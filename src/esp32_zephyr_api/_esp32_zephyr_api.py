@@ -79,7 +79,7 @@ class Esp32API:
 
     def version_get(self) -> dict:
         resp_dict = {
-            'data': {}, 'status': {'ret': ''}
+            'data': {}, 'status': 'Ok'
         }
 
         req = request()
@@ -90,17 +90,15 @@ class Esp32API:
                 resp_dict['data']['branch'] = res.version_get.branch
                 resp_dict['data']['sha1'] = res.version_get.sha1
                 resp_dict['data']['commit_date'] = res.version_get.commit_date
-                resp_dict['status']['ret'] = 'OK'
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
-                resp_dict['status']['ret'] = 'Error'
-                resp_dict['status']['err_msg'] = res.hdr.err_msg
+                resp_dict['status']['Error'] = res.hdr.err_msg
 
         return resp_dict
 
     def adc_channels_get(self) -> dict:
         resp_dict = {
-            'data': {}, 'status': {'ret': ''}
+            'data': {}, 'status': 'Ok'
         }
 
         req = request()
@@ -108,17 +106,15 @@ class Esp32API:
         if res is not None:
             if res.hdr.ret == OK:
                 resp_dict['data']['adc_chs'] = res.adc_chs_get.adc_chs
-                resp_dict['status']['ret'] = 'OK'
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
-                resp_dict['status']['ret'] = 'Error'
-                resp_dict['status']['err_msg'] = res.hdr.err_msg
+                resp_dict['status']['Error'] = res.hdr.err_msg
 
         return resp_dict
 
     def adc_channel_read(self, ch: int) -> dict:
         resp_dict = {
-            'data': {}, 'status': {'ret': ''}
+            'data': {}, 'status': 'Ok'
         }
 
         req = request()
@@ -129,14 +125,13 @@ class Esp32API:
                 resp_dict['data']['adc_val'] = res.adc_ch_read.val
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
-                resp_dict['status']['ret'] = 'Error'
-                resp_dict['status']['err_msg'] = res.hdr.err_msg
+                resp_dict['status']['Error'] = res.hdr.err_msg
 
         return resp_dict
 
     def pwm_chs_get(self) -> dict:
         resp_dict = {
-            'data': {}, 'status': {'ret': ''}
+            'data': {}, 'status': 'Ok'
         }
 
         pwm_chs = 0
@@ -147,14 +142,13 @@ class Esp32API:
                 resp_dict['data']['pwm_chs'] = res.pwm_chs_get.pwm_chs
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
-                resp_dict['status']['ret'] = 'Error'
-                resp_dict['status']['err_msg'] = res.hdr.err_msg
+                resp_dict['status']['Error'] = res.hdr.err_msg
 
         return resp_dict
 
     def pwm_get(self, ch: int) -> dict:
         resp_dict = {
-            'data': {}, 'status': {'ret': ''}
+            'data': {}, 'status': 'Ok'
         }
 
         adc_val = 0
@@ -166,14 +160,13 @@ class Esp32API:
                 resp_dict['data']['adc_val'] = res.adc_ch_read.val
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
-                resp_dict['status']['ret'] = 'Error'
-                resp_dict['status']['err_msg'] = res.hdr.err_msg
+                resp_dict['status']['Error'] = res.hdr.err_msg
 
         return resp_dict
 
     def pwm_set(self, ch: int, period: int, pulse: int) -> dict:
         resp_dict = {
-            'data': {}, 'status': {'ret': ''}
+            'data': {}, 'status': 'Ok'
         }
 
         req = request()
@@ -184,14 +177,13 @@ class Esp32API:
         if res is not None:
             if res.hdr.ret != OK:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
-                resp_dict['status']['ret'] = 'Error'
-                resp_dict['status']['err_msg'] = res.hdr.err_msg
+                resp_dict['status']['Error'] = res.hdr.err_msg
 
         return resp_dict
 
     def pwm_periods_get(self) -> dict:
         resp_dict = {
-            'data': {}, 'status': {'ret': ''}
+            'data': {}, 'status': 'Ok'
         }
 
         req = request()
@@ -202,7 +194,6 @@ class Esp32API:
                 resp_dict['data']['max'] = res.pwm_periods_get.period_max
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
-                resp_dict['status']['ret'] = 'Error'
-                resp_dict['status']['err_msg'] = res.hdr.err_msg
+                resp_dict['status']['Error'] = res.hdr.err_msg
 
         return resp_dict
