@@ -21,6 +21,13 @@ class Esp32API:
 
     def __init__(self, protocol: str, address: str, port: int):
         """
+        Initialize the Esp32API instance and set up connection parameters.
+        Args:
+            protocol (str): Communication protocol ('tcp' or 'udp').
+            address (str): ESP32 IPv4 address.
+            port (int): ESP32 port number.
+        """
+        """
         Initialize connection to ESP32.
         :param protocol: 'tcp' or 'udp'
         :param address: ESP32 IPv4 address as string
@@ -35,6 +42,13 @@ class Esp32API:
         }
 
     def _sock_tcp_send(self, req_raw: bytearray):
+        """
+        Send a request via TCP and receive the response.
+        Args:
+            req_raw (bytearray): Serialized request data.
+        Returns:
+            bytes or None: Response data or None if timeout occurs.
+        """
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(5.0)
             s.connect(self.addr)
@@ -46,6 +60,13 @@ class Esp32API:
                 return None
 
     def _sock_udp_send(self, req_raw: bytearray):
+        """
+        Send a request via UDP and receive the response.
+        Args:
+            req_raw (bytearray): Serialized request data.
+        Returns:
+            bytes or None: Response data or None if timeout occurs.
+        """
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(5.0)
             s.sendto(req_raw, self.addr)
@@ -57,6 +78,14 @@ class Esp32API:
                 return None
 
     def send_cmd(self, req: object, req_id: int):
+        """
+        Serialize and send a protobuf request, then wait for and parse the response.
+        Args:
+            req (object): Protobuf request object.
+            req_id (int): Command ID.
+        Returns:
+            response or None: Parsed response object or None if parsing fails.
+        """
         """
         Serialize and send protobuf request, then wait for and parse response.
         """
@@ -78,6 +107,11 @@ class Esp32API:
         return res
 
     def version_get(self) -> dict:
+        """
+        Retrieve version information from ESP32.
+        Returns:
+            dict: Dictionary containing version, branch, sha1, and commit date.
+        """
         resp_dict = {
             'data': {}, 'status': 'Ok'
         }
@@ -97,6 +131,11 @@ class Esp32API:
         return resp_dict
 
     def adc_channels_get(self) -> dict:
+        """
+        Get available ADC channels from ESP32.
+        Returns:
+            dict: Dictionary containing list of ADC channels.
+        """
         resp_dict = {
             'data': {}, 'status': 'Ok'
         }
@@ -113,6 +152,13 @@ class Esp32API:
         return resp_dict
 
     def adc_channel_read(self, ch: int) -> dict:
+        """
+        Read the value from a specific ADC channel.
+        Args:
+            ch (int): ADC channel number.
+        Returns:
+            dict: Dictionary containing the ADC value.
+        """
         resp_dict = {
             'data': {}, 'status': 'Ok'
         }
@@ -130,6 +176,11 @@ class Esp32API:
         return resp_dict
 
     def pwm_chs_get(self) -> dict:
+        """
+        Get available PWM channels from ESP32.
+        Returns:
+            dict: Dictionary containing list of PWM channels.
+        """
         resp_dict = {
             'data': {}, 'status': 'Ok'
         }
@@ -147,17 +198,25 @@ class Esp32API:
         return resp_dict
 
     def pwm_get(self, ch: int) -> dict:
+        """
+        Retrieve PWM period and pulse values for a specific channel.
+        Args:
+            ch (int): PWM channel number.
+        Returns:
+            dict: Dictionary containing period and pulse values.
+        """
         resp_dict = {
             'data': {}, 'status': 'Ok'
         }
 
-        adc_val = 0
+        pwm_val = 0
         req = request()
-        req.adc_ch_read.ch = ch
+        req.pwm_ch_get.ch = ch
         res = self.send_cmd(req, PWM_CH_GET)
         if res is not None:
             if res.hdr.ret == OK:
-                resp_dict['data']['adc_val'] = res.adc_ch_read.val
+                resp_dict['data']['period'] = res.pwm_ch_get.peridod
+                resp_dict['data']['pulse'] = res.pwm_ch_get.pulse
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
                 resp_dict['status']['Error'] = res.hdr.err_msg
@@ -165,6 +224,15 @@ class Esp32API:
         return resp_dict
 
     def pwm_set(self, ch: int, period: int, pulse: int) -> dict:
+        """
+        Set PWM period and pulse for a specific channel.
+        Args:
+            ch (int): PWM channel number.
+            period (int): PWM period value.
+            pulse (int): PWM pulse value.
+        Returns:
+            dict: Status dictionary indicating success or error.
+        """
         resp_dict = {
             'data': {}, 'status': 'Ok'
         }
@@ -182,6 +250,11 @@ class Esp32API:
         return resp_dict
 
     def pwm_periods_get(self) -> dict:
+        """
+        Get minimum and maximum PWM period values supported by ESP32.
+        Returns:
+            dict: Dictionary containing min and max period values.
+        """
         resp_dict = {
             'data': {}, 'status': 'Ok'
         }
