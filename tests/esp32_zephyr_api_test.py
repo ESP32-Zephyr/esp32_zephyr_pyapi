@@ -14,6 +14,9 @@ def esp32_api(request):
 
 class TestEsp32API:
 
+    def test_ping(self, esp32_api):
+        pong = esp32_api.ping()
+
     def test_version_get(self, esp32_api):
         version = esp32_api.version_get()
 
