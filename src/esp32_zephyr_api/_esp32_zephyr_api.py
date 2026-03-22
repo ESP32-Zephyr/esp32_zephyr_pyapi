@@ -106,6 +106,27 @@ class Esp32API:
 
         return res
 
+    def ping(self) -> dict:
+        """
+        Send ping to ESP32.
+        Returns:
+            dict: Dictionary containing pong string
+        """
+        resp_dict = {
+            'data': {}, 'status': 'Ok'
+        }
+
+        req = request()
+        res = self.send_cmd(req, PING)
+        if res is not None:
+            if res.hdr.ret == OK:
+                resp_dict['data']['ping'] = res.ping.pong
+            else:
+                logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
+                resp_dict['status']['Error'] = res.hdr.err_msg
+
+        return resp_dict
+
     def version_get(self) -> dict:
         """
         Retrieve version information from ESP32.
@@ -215,7 +236,7 @@ class Esp32API:
         res = self.send_cmd(req, PWM_CH_GET)
         if res is not None:
             if res.hdr.ret == OK:
-                resp_dict['data']['period'] = res.pwm_ch_get.peridod
+                resp_dict['data']['period'] = res.pwm_ch_get.period
                 resp_dict['data']['pulse'] = res.pwm_ch_get.pulse
             else:
                 logger.error(f"Command failed: ({res.hdr.ret }) {res.hdr.err_msg}")
